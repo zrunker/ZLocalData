@@ -5,10 +5,6 @@
 
 #### 功能：本地数据管理
 
-#### 名称：
-  localdatalib（功能+lib）
-  ApplicationId：com.dayi56.android.localdatalib（com.dayi56.android.名称小写）
-
 #### 支持：
 静态常量/内存/SP/Assets/SQLite/File
 
