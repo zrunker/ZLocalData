@@ -26,7 +26,7 @@ public class SQLiteDaoImpl implements SQLiteDao {
      * 删除数据库表
      */
     @Override
-    public synchronized void deleteDbTable() {
+    public synchronized void deleteDbTables() {
         // 获取一个可写的数据库
         SQLiteDatabase db = dbHelper.openDatabase();
         // 删除数据表

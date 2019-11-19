@@ -14,5 +14,5 @@ public interface SQLiteDao {
     void initSQLiteHelper(Context context);
 
     // 删除数据库表
-    void deleteDbTable();
+    void deleteDbTables();
 }

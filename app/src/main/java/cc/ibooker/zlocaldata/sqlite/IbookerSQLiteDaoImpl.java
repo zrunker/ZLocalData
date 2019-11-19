@@ -24,7 +24,7 @@ public class IbookerSQLiteDaoImpl implements IbookerSQLiteDao {
     }
 
     @Override
-    public void deleteDbTable() {
+    public void deleteDbTables() {
         // 获取一个可写的数据库
         SQLiteDatabase db = dbHelper.openDatabase();
         // 删除数据表

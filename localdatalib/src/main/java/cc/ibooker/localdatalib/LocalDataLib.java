@@ -111,6 +111,6 @@ public class LocalDataLib {
         // 删除所有文件
         FileUtil.deleteDir(FileUtil.ZFILEPATH);
         // 删除数据库
-        new SQLiteDaoImpl(LocalDataLib.getApplication()).deleteDbTable();
+        new SQLiteDaoImpl(LocalDataLib.getApplication()).deleteDbTables();
     }
 }
