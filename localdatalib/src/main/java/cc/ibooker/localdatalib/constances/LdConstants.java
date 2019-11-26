@@ -10,6 +10,8 @@ public class LdConstants {
     public static final String LOCALDATA_LRUCACHE_KEYS = "localdata_lrucache_keys";
     // 公共SP文件名
     public static final String LOCALDATA_COMMON_SHAREDPREFERENCES_NAME = "localdata_common_sharedpreferences_name";
+    // APP SP缓存 KEY
+    public static final String LOCALDATA_SHAREDPREFERENCES_SPCACHE_KEY = "localdata_sharedpreferences_spcache_key";
     // 公共assets文件名
     public static final String LOCALDATA_COMMON_ASSETS_NAME = "localdata_common_assets.json";
     // 公共assets文件KEY
