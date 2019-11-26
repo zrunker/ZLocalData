@@ -61,29 +61,33 @@ public class SharedPreferencesUtil {
 
     // 更新spCache
     private HashMap<String, SharedPreferences> getSpCache() {
-        try {
-            if (spCache == null) {
-                Application application = LocalDataLib.getApplication();
-                if (application != null) {
-                    SharedPreferences sharedPreferences = application.getSharedPreferences(LdConstants.LOCALDATA_COMMON_SHAREDPREFERENCES_NAME, Context.MODE_PRIVATE);
-                    String jsonStr = sharedPreferences.getString(LdConstants.LOCALDATA_SHAREDPREFERENCES_SPCACHE_KEY, null);
-                    if (!TextUtils.isEmpty(jsonStr)) {
-                        JSONObject jsonObject = new JSONObject(jsonStr);
-                        spCache = getJsonToHashMap(jsonObject.optString(LdConstants.LOCALDATA_SHAREDPREFERENCES_SPCACHE_KEY));
+        if (spCache != null && spCache.size() > 0)
+            return spCache;
+        synchronized (SharedPreferencesUtil.class) {
+            try {
+                if (spCache == null) {
+                    Application application = LocalDataLib.getApplication();
+                    if (application != null) {
+                        SharedPreferences sharedPreferences = application.getSharedPreferences(LdConstants.LOCALDATA_COMMON_SHAREDPREFERENCES_NAME, Context.MODE_PRIVATE);
+                        String jsonStr = sharedPreferences.getString(LdConstants.LOCALDATA_SHAREDPREFERENCES_SPCACHE_KEY, null);
+                        if (!TextUtils.isEmpty(jsonStr)) {
+                            JSONObject jsonObject = new JSONObject(jsonStr);
+                            spCache = getJsonToHashMap(jsonObject.optString(LdConstants.LOCALDATA_SHAREDPREFERENCES_SPCACHE_KEY));
+                        }
                     }
                 }
+                if (spCache == null) {
+                    spCache = new HashMap<>();
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put(LdConstants.LOCALDATA_SHAREDPREFERENCES_SPCACHE_KEY, spCache);
+                    putObject(LdConstants.LOCALDATA_SHAREDPREFERENCES_SPCACHE_KEY, jsonObject.toString());
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } finally {
+                if (spCache == null)
+                    spCache = new HashMap<>();
             }
-            if (spCache == null) {
-                spCache = new HashMap<>();
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put(LdConstants.LOCALDATA_SHAREDPREFERENCES_SPCACHE_KEY, spCache);
-                putObject(LdConstants.LOCALDATA_SHAREDPREFERENCES_SPCACHE_KEY, jsonObject.toString());
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } finally {
-            if (spCache == null)
-                spCache = new HashMap<>();
         }
         return spCache;
     }
