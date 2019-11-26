@@ -264,27 +264,53 @@ public class SharedPreferencesUtil {
         }
     }
 
-    // 清空指定SharedPreferences
-    public void removeSpByKey(String key) {
+    // 根据key移除指定SharedPreferences中的数据
+    public boolean removeSpByKey(String key) {
+        boolean bool = false;
         if (spCache != null && spCache.size() > 0) {
             for (HashMap.Entry<String, SharedPreferences> entry : spCache.entrySet()) {
-                if (entry.getKey().equals(key)) {
-                    SharedPreferences sharedPreferences = spCache.get(entry.getKey());
-                    if (sharedPreferences != null) {
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.clear();
-                        editor.apply();
-                        spCache.remove(entry.getKey());
-                        break;
-                    }
+                SharedPreferences sharedPreferences = spCache.get(entry.getKey());
+                if (sharedPreferences != null) {
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.remove(key);
+                    bool = editor.commit();
                 }
             }
         } else {
             SharedPreferences sharedPreferences = createSharedPreferences(LdConstants.LOCALDATA_COMMON_SHAREDPREFERENCES_NAME, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.clear();
-            editor.apply();
+            editor.remove(key);
+            bool = editor.commit();
         }
+        return bool;
     }
 
+    /**
+     * 根据name清空指定SharedPreferences
+     *
+     * @param name SP的名称
+     */
+    public boolean removeSpByName(String name) {
+        boolean bool = false;
+        if (LdConstants.LOCALDATA_COMMON_SHAREDPREFERENCES_NAME.equals(name)) {
+            SharedPreferences sharedPreferences = createSharedPreferences(LdConstants.LOCALDATA_COMMON_SHAREDPREFERENCES_NAME, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.clear();
+            bool = editor.commit();
+        } else if (spCache != null && spCache.size() > 0) {
+            for (HashMap.Entry<String, SharedPreferences> entry : spCache.entrySet()) {
+                if (entry.getKey().equals(name)) {
+                    SharedPreferences sharedPreferences = spCache.get(entry.getKey());
+                    if (sharedPreferences != null) {
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.clear();
+                        bool = editor.commit();
+                        spCache.remove(entry.getKey());
+                        break;
+                    }
+                }
+            }
+        }
+        return bool;
+    }
 }
