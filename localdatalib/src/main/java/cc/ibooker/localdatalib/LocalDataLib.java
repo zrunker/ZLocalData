@@ -99,7 +99,7 @@ public class LocalDataLib {
     }
 
     // 清空所有数据
-    public static void clearAllData() {
+    public synchronized static void clearAllData() {
         // 静态常量
         LdStaticConstantUtil.getInstance().clearData();
         // 缓存

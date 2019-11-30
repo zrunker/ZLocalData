@@ -34,14 +34,14 @@ public class LruCacheUtil {
     }
 
     // 获取Object
-    public Object getObject(String key) {
+    public synchronized Object getObject(String key) {
         if (mLruCache != null)
             return mLruCache.get(key);
         return null;
     }
 
     // 保存Object
-    public void putObject(String key, Object obj) {
+    public synchronized void putObject(String key, Object obj) {
         if (mLruCache != null) {
             mLruCache.put(key, obj);
             // 保存key
@@ -50,7 +50,7 @@ public class LruCacheUtil {
     }
 
     // 移除Object
-    public void removeObject(String key) {
+    public synchronized void removeObject(String key) {
         if (mLruCache != null) {
             mLruCache.remove(key);
             // 移除key
@@ -59,7 +59,7 @@ public class LruCacheUtil {
     }
 
     // 清空数据
-    public void clear() {
+    public synchronized void clear() {
         if (mLruCache != null) {
             ArrayList<String> keys = getKeys();
             if (keys != null && keys.size() > 0)
@@ -72,7 +72,7 @@ public class LruCacheUtil {
     /**
      * 获取所有Key集合
      */
-    private ArrayList<String> getKeys() {
+    private synchronized ArrayList<String> getKeys() {
         ArrayList<String> keys = null;
         if (mLruCache != null) {
             Object obj = mLruCache.get(LOCALDATA_LRUCACHE_KEYS);
@@ -87,7 +87,7 @@ public class LruCacheUtil {
      *
      * @param key 待保存的Key
      */
-    private void saveKey(String key) {
+    private synchronized void saveKey(String key) {
         ArrayList<String> keys = getKeys();
         if (keys != null && keys.size() > 0)
             keys.add(key);
@@ -98,7 +98,7 @@ public class LruCacheUtil {
      *
      * @param key 待移除的Key
      */
-    private void removeKey(String key) {
+    private synchronized void removeKey(String key) {
         ArrayList<String> keys = getKeys();
         if (keys != null && keys.size() > 0)
             keys.remove(key);

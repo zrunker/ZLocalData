@@ -93,7 +93,7 @@ public class SharedPreferencesUtil {
     }
 
     // 创建SharedPreferences
-    public SharedPreferences createSharedPreferences(String name, int mode) {
+    public synchronized SharedPreferences createSharedPreferences(String name, int mode) {
         if (mode != Context.MODE_PRIVATE && mode != Context.MODE_APPEND && mode != MODE_MULTI_PROCESS)
             return null;
         Application application = LocalDataLib.getApplication();
@@ -126,7 +126,7 @@ public class SharedPreferencesUtil {
      * @param key 键值
      * @param obj 待保存的值
      */
-    public boolean putObject(String key, Object obj) {
+    public synchronized boolean putObject(String key, Object obj) {
         SharedPreferences sharedPreferences = createSharedPreferences(
                 LdConstants.LOCALDATA_COMMON_SHAREDPREFERENCES_NAME, Context.MODE_PRIVATE);
         if (sharedPreferences != null)
@@ -141,7 +141,7 @@ public class SharedPreferencesUtil {
      * @param key  键值
      * @param obj  待保存的值
      */
-    public boolean putObject(String name, String key, Object obj) {
+    public synchronized boolean putObject(String name, String key, Object obj) {
         SharedPreferences sharedPreferences = createSharedPreferences(
                 name, Context.MODE_PRIVATE);
         if (sharedPreferences != null)
@@ -156,7 +156,7 @@ public class SharedPreferencesUtil {
      * @param obj  待保存的值
      * @param mode sp模式
      */
-    public boolean putObject(String key, Object obj, int mode) {
+    public synchronized boolean putObject(String key, Object obj, int mode) {
         SharedPreferences sharedPreferences = createSharedPreferences(
                 LdConstants.LOCALDATA_COMMON_SHAREDPREFERENCES_NAME, mode);
         if (sharedPreferences != null)
@@ -172,7 +172,7 @@ public class SharedPreferencesUtil {
      * @param obj  待保存的值
      * @param mode sp模式
      */
-    public boolean putObject(String name, String key, Object obj, int mode) {
+    public synchronized boolean putObject(String name, String key, Object obj, int mode) {
         SharedPreferences sharedPreferences = createSharedPreferences(
                 name, mode);
         if (sharedPreferences != null)
@@ -185,7 +185,7 @@ public class SharedPreferencesUtil {
      *
      * @param key 键值
      */
-    public Object getObject(String key) {
+    public synchronized Object getObject(String key) {
         if (spCache != null && spCache.size() > 0)
             for (Map.Entry<String, ?> entry : spCache.entrySet()) {
                 SharedPreferences sharedPreferences = (SharedPreferences) entry.getValue();
@@ -205,7 +205,7 @@ public class SharedPreferencesUtil {
     }
 
     // 获取SharedPreferences中所有数据
-    public Map<String, ?> readSharedPreferences(String name, int mode) {
+    public synchronized Map<String, ?> readSharedPreferences(String name, int mode) {
         if (mode != Context.MODE_PRIVATE && mode != Context.MODE_APPEND && mode != MODE_MULTI_PROCESS)
             return null;
         Application application = LocalDataLib.getApplication();
@@ -217,12 +217,12 @@ public class SharedPreferencesUtil {
     }
 
     // 保存数据到SharedPreferences
-    public boolean saveSharedPreferences(String name, Map<String, ?> map) {
+    public synchronized boolean saveSharedPreferences(String name, Map<String, ?> map) {
         return saveSharedPreferences(name, Context.MODE_PRIVATE, map);
     }
 
     // 保存数据到SharedPreferences
-    public boolean saveSharedPreferences(String name, int mode, Map<String, ?> map) {
+    public synchronized boolean saveSharedPreferences(String name, int mode, Map<String, ?> map) {
         SharedPreferences sharedPreferences = createSharedPreferences(name, mode);
         if (sharedPreferences != null) {
             SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -245,7 +245,7 @@ public class SharedPreferencesUtil {
     }
 
     // 清空所有SharedPreference
-    public void clearAllSp() {
+    public synchronized void clearAllSp() {
         if (spCache != null && spCache.size() > 0) {
             for (HashMap.Entry<String, SharedPreferences> entry : spCache.entrySet()) {
                 SharedPreferences sharedPreferences = spCache.get(entry.getKey());
@@ -265,7 +265,7 @@ public class SharedPreferencesUtil {
     }
 
     // 根据key移除指定SharedPreferences中的数据
-    public boolean removeSpByKey(String key) {
+    public synchronized boolean removeSpByKey(String key) {
         boolean bool = false;
         if (spCache != null && spCache.size() > 0) {
             for (HashMap.Entry<String, SharedPreferences> entry : spCache.entrySet()) {
@@ -290,7 +290,7 @@ public class SharedPreferencesUtil {
      *
      * @param name SP的名称
      */
-    public boolean removeSpByName(String name) {
+    public synchronized boolean removeSpByName(String name) {
         boolean bool = false;
         if (LdConstants.LOCALDATA_COMMON_SHAREDPREFERENCES_NAME.equals(name)) {
             SharedPreferences sharedPreferences = createSharedPreferences(LdConstants.LOCALDATA_COMMON_SHAREDPREFERENCES_NAME, Context.MODE_PRIVATE);
