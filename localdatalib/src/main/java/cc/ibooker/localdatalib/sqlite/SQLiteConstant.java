@@ -9,7 +9,7 @@ import java.util.Set;
  */
 public class SQLiteConstant {
     static final String DB_NAME = "dayi56.db"; //数据库名称
-    static final int DB_VERSION = 1; //数据库版本号
+    static final int DB_VERSION = 2; //数据库版本号
 
     // 创建表集合
     static Set<String> sqlCreateTableList = new HashSet<>();

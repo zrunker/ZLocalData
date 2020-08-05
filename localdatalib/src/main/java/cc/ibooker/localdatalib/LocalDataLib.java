@@ -8,7 +8,7 @@ import cc.ibooker.localdatalib.constances.LdConstants;
 import cc.ibooker.localdatalib.constances.LdStaticConstantUtil;
 import cc.ibooker.localdatalib.files.AssetsUtil;
 import cc.ibooker.localdatalib.files.FileUtil;
-import cc.ibooker.localdatalib.sharedps.SharedPreferencesUtil;
+import cc.ibooker.localdatalib.sharedps.TraySpUtil;
 import cc.ibooker.localdatalib.sqlite.SQLiteDaoImpl;
 
 /**
@@ -73,7 +73,7 @@ public class LocalDataLib {
             // 保存到缓存中
             LruCacheUtil.getInstance().putObject(key, value);
             // 保存到Sp中
-            SharedPreferencesUtil.getInstance().putObject(key, value);
+            TraySpUtil.getInstance().putObject(key, value);
         }
         return true;
     }
@@ -93,19 +93,19 @@ public class LocalDataLib {
                 obj = LruCacheUtil.getInstance().getObject(key);
             // 读取Sp
             if (obj == null)
-                obj = SharedPreferencesUtil.getInstance().getObject(key);
+                obj = TraySpUtil.getInstance().getObject(key);
         }
         return obj;
     }
 
     // 清空所有数据
-    public synchronized static void clearAllData() {
+    public static void clearAllData() {
         // 静态常量
         LdStaticConstantUtil.getInstance().clearData();
         // 缓存
         LruCacheUtil.getInstance().clear();
         // 清空SP
-        SharedPreferencesUtil.getInstance().clearAllSp();
+        TraySpUtil.getInstance().clearAllSp();
         // 清空Assets
         AssetsUtil.getInstance().writeAssets(LdConstants.LOCALDATA_COMMON_ASSETS_KEY, LdConstants.LOCALDATA_COMMON_ASSETS_NAME, null, "");
         // 删除所有文件

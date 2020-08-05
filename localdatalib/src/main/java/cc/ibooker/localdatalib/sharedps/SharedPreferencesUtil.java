@@ -3,13 +3,9 @@ package cc.ibooker.localdatalib.sharedps;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.text.TextUtils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import android.support.annotation.NonNull;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import cc.ibooker.localdatalib.LocalDataLib;
@@ -19,12 +15,12 @@ import static android.content.Context.MODE_MULTI_PROCESS;
 
 /**
  * SharedPreferences管理类 - 对跨进程处理不是很好
- * SP 只能保存基本数据类型
  *
  * @author 邹峰立
  */
+@Deprecated
 public class SharedPreferencesUtil {
-    private HashMap<String, SharedPreferences> spCache = getSpCache();
+    private HashMap<String, SharedPreferences> mapCache = new HashMap<>();
     private static SharedPreferencesUtil sharedPreferencesUtil;
 
     public static SharedPreferencesUtil getInstance() {
@@ -35,80 +31,23 @@ public class SharedPreferencesUtil {
         return sharedPreferencesUtil;
     }
 
-    /**
-     * 将JSON字符串转换成HashMap
-     *
-     * @param jsonStr 待转换JSON
-     */
-    private HashMap<String, SharedPreferences> getJsonToHashMap(String jsonStr) {
-        try {
-            JSONObject jsonObject = new JSONObject(jsonStr);
-            Iterator<String> keyIter = jsonObject.keys();
-            String key;
-            Object value;
-            HashMap<String, SharedPreferences> map = new HashMap<>();
-            while (keyIter.hasNext()) {
-                key = keyIter.next();
-                value = jsonObject.get(key);
-                map.put(key, (SharedPreferences) value);
-            }
-            return map;
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    // 更新spCache
-    private HashMap<String, SharedPreferences> getSpCache() {
-        if (spCache != null && spCache.size() > 0)
-            return spCache;
-        synchronized (SharedPreferencesUtil.class) {
-            try {
-                if (spCache == null) {
-                    Application application = LocalDataLib.getApplication();
-                    if (application != null) {
-                        SharedPreferences sharedPreferences = application.getSharedPreferences(LdConstants.LOCALDATA_COMMON_SHAREDPREFERENCES_NAME, Context.MODE_PRIVATE);
-                        String jsonStr = sharedPreferences.getString(LdConstants.LOCALDATA_SHAREDPREFERENCES_SPCACHE_KEY, null);
-                        if (!TextUtils.isEmpty(jsonStr)) {
-                            JSONObject jsonObject = new JSONObject(jsonStr);
-                            spCache = getJsonToHashMap(jsonObject.optString(LdConstants.LOCALDATA_SHAREDPREFERENCES_SPCACHE_KEY));
-                        }
-                    }
-                }
-                if (spCache == null) {
-                    spCache = new HashMap<>();
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put(LdConstants.LOCALDATA_SHAREDPREFERENCES_SPCACHE_KEY, spCache);
-                    putObject(LdConstants.LOCALDATA_SHAREDPREFERENCES_SPCACHE_KEY, jsonObject.toString());
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } finally {
-                if (spCache == null)
-                    spCache = new HashMap<>();
-            }
-        }
-        return spCache;
-    }
-
     // 创建SharedPreferences
-    public synchronized SharedPreferences createSharedPreferences(String name, int mode) {
+    public SharedPreferences createSharedPreferences(@NonNull final String name, int mode) {
         if (mode != Context.MODE_PRIVATE && mode != Context.MODE_APPEND && mode != MODE_MULTI_PROCESS)
             return null;
         Application application = LocalDataLib.getApplication();
-        SharedPreferences sharedPreferences = spCache.get(name);
+        SharedPreferences sharedPreferences = mapCache.get(name);
         if (sharedPreferences == null && application != null) {
             sharedPreferences = application.getSharedPreferences(name, mode);
-            spCache.put(name, sharedPreferences);
+            mapCache.put(name, sharedPreferences);
         }
         return sharedPreferences;
     }
 
     // 保存数据
-    private boolean saveData(SharedPreferences.Editor editor, String key, Object obj) {
+    private boolean saveData(@NonNull final SharedPreferences.Editor editor, @NonNull final String key, @NonNull final Object obj) {
         if (obj instanceof String)
-            editor.putString(key, (String) obj);
+            editor.putString(key, obj.toString());
         if (obj instanceof Boolean)
             editor.putBoolean(key, (Boolean) obj);
         if (obj instanceof Integer)
@@ -126,7 +65,7 @@ public class SharedPreferencesUtil {
      * @param key 键值
      * @param obj 待保存的值
      */
-    public synchronized boolean putObject(String key, Object obj) {
+    public boolean putObject(@NonNull final String key, @NonNull final Object obj) {
         SharedPreferences sharedPreferences = createSharedPreferences(
                 LdConstants.LOCALDATA_COMMON_SHAREDPREFERENCES_NAME, Context.MODE_PRIVATE);
         if (sharedPreferences != null)
@@ -141,7 +80,7 @@ public class SharedPreferencesUtil {
      * @param key  键值
      * @param obj  待保存的值
      */
-    public synchronized boolean putObject(String name, String key, Object obj) {
+    public boolean putObject(@NonNull final String name, @NonNull final String key, @NonNull final Object obj) {
         SharedPreferences sharedPreferences = createSharedPreferences(
                 name, Context.MODE_PRIVATE);
         if (sharedPreferences != null)
@@ -156,7 +95,7 @@ public class SharedPreferencesUtil {
      * @param obj  待保存的值
      * @param mode sp模式
      */
-    public synchronized boolean putObject(String key, Object obj, int mode) {
+    public boolean putObject(@NonNull final String key, @NonNull final Object obj, int mode) {
         SharedPreferences sharedPreferences = createSharedPreferences(
                 LdConstants.LOCALDATA_COMMON_SHAREDPREFERENCES_NAME, mode);
         if (sharedPreferences != null)
@@ -172,7 +111,7 @@ public class SharedPreferencesUtil {
      * @param obj  待保存的值
      * @param mode sp模式
      */
-    public synchronized boolean putObject(String name, String key, Object obj, int mode) {
+    public boolean putObject(@NonNull final String name, @NonNull final String key, @NonNull final Object obj, int mode) {
         SharedPreferences sharedPreferences = createSharedPreferences(
                 name, mode);
         if (sharedPreferences != null)
@@ -185,17 +124,9 @@ public class SharedPreferencesUtil {
      *
      * @param key 键值
      */
-    public synchronized Object getObject(String key) {
-        if (spCache != null && spCache.size() > 0)
-            for (Map.Entry<String, ?> entry : spCache.entrySet()) {
-                SharedPreferences sharedPreferences = (SharedPreferences) entry.getValue();
-                Map<String, ?> map = sharedPreferences.getAll();
-                Object obj = map.get(key);
-                if (obj != null)
-                    return obj;
-            }
-        else {
-            SharedPreferences sharedPreferences = createSharedPreferences(LdConstants.LOCALDATA_COMMON_SHAREDPREFERENCES_NAME, Context.MODE_PRIVATE);
+    public Object getObject(@NonNull final String key) {
+        for (Map.Entry<String, ?> entry : mapCache.entrySet()) {
+            SharedPreferences sharedPreferences = (SharedPreferences) entry.getValue();
             Map<String, ?> map = sharedPreferences.getAll();
             Object obj = map.get(key);
             if (obj != null)
@@ -205,7 +136,7 @@ public class SharedPreferencesUtil {
     }
 
     // 获取SharedPreferences中所有数据
-    public synchronized Map<String, ?> readSharedPreferences(String name, int mode) {
+    public Map<String, ?> readSharedPreferences(@NonNull final String name, int mode) {
         if (mode != Context.MODE_PRIVATE && mode != Context.MODE_APPEND && mode != MODE_MULTI_PROCESS)
             return null;
         Application application = LocalDataLib.getApplication();
@@ -217,19 +148,19 @@ public class SharedPreferencesUtil {
     }
 
     // 保存数据到SharedPreferences
-    public synchronized boolean saveSharedPreferences(String name, Map<String, ?> map) {
+    public boolean saveSharedPreferences(@NonNull final String name, @NonNull final Map<String, ?> map) {
         return saveSharedPreferences(name, Context.MODE_PRIVATE, map);
     }
 
     // 保存数据到SharedPreferences
-    public synchronized boolean saveSharedPreferences(String name, int mode, Map<String, ?> map) {
+    public boolean saveSharedPreferences(@NonNull final String name, int mode, @NonNull final Map<String, ?> map) {
         SharedPreferences sharedPreferences = createSharedPreferences(name, mode);
         if (sharedPreferences != null) {
             SharedPreferences.Editor editor = sharedPreferences.edit();
             for (Map.Entry<String, ?> entry : map.entrySet()) {
                 Object obj = entry.getValue();
                 if (obj instanceof String)
-                    editor.putString(entry.getKey(), (String) obj);
+                    editor.putString(entry.getKey(), obj.toString());
                 if (obj instanceof Boolean)
                     editor.putBoolean(entry.getKey(), (Boolean) obj);
                 if (obj instanceof Integer)
@@ -245,72 +176,36 @@ public class SharedPreferencesUtil {
     }
 
     // 清空所有SharedPreference
-    public synchronized void clearAllSp() {
-        if (spCache != null && spCache.size() > 0) {
-            for (HashMap.Entry<String, SharedPreferences> entry : spCache.entrySet()) {
-                SharedPreferences sharedPreferences = spCache.get(entry.getKey());
+    public void clearAllSp() {
+        if (mapCache != null && mapCache.size() > 0) {
+            for (HashMap.Entry<String, SharedPreferences> entry : mapCache.entrySet()) {
+                SharedPreferences sharedPreferences = mapCache.get(entry.getKey());
                 if (sharedPreferences != null) {
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.clear();
                     editor.apply();
                 }
             }
-            spCache.clear();
-        } else {
-            SharedPreferences sharedPreferences = createSharedPreferences(LdConstants.LOCALDATA_COMMON_SHAREDPREFERENCES_NAME, Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.clear();
-            editor.apply();
+            mapCache.clear();
         }
     }
 
-    // 根据key移除指定SharedPreferences中的数据
-    public synchronized boolean removeSpByKey(String key) {
-        boolean bool = false;
-        if (spCache != null && spCache.size() > 0) {
-            for (HashMap.Entry<String, SharedPreferences> entry : spCache.entrySet()) {
-                SharedPreferences sharedPreferences = spCache.get(entry.getKey());
-                if (sharedPreferences != null) {
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.remove(key);
-                    bool = editor.commit();
-                }
-            }
-        } else {
-            SharedPreferences sharedPreferences = createSharedPreferences(LdConstants.LOCALDATA_COMMON_SHAREDPREFERENCES_NAME, Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.remove(key);
-            bool = editor.commit();
-        }
-        return bool;
-    }
-
-    /**
-     * 根据name清空指定SharedPreferences
-     *
-     * @param name SP的名称
-     */
-    public synchronized boolean removeSpByName(String name) {
-        boolean bool = false;
-        if (LdConstants.LOCALDATA_COMMON_SHAREDPREFERENCES_NAME.equals(name)) {
-            SharedPreferences sharedPreferences = createSharedPreferences(LdConstants.LOCALDATA_COMMON_SHAREDPREFERENCES_NAME, Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.clear();
-            bool = editor.commit();
-        } else if (spCache != null && spCache.size() > 0) {
-            for (HashMap.Entry<String, SharedPreferences> entry : spCache.entrySet()) {
-                if (entry.getKey().equals(name)) {
-                    SharedPreferences sharedPreferences = spCache.get(entry.getKey());
+    // 清空指定SharedPreferences
+    public void removeSpByKey(@NonNull final String key) {
+        if (mapCache != null && mapCache.size() > 0) {
+            for (HashMap.Entry<String, SharedPreferences> entry : mapCache.entrySet()) {
+                if (entry.getKey().equals(key)) {
+                    SharedPreferences sharedPreferences = mapCache.get(entry.getKey());
                     if (sharedPreferences != null) {
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.clear();
-                        bool = editor.commit();
-                        spCache.remove(entry.getKey());
+                        editor.apply();
+                        mapCache.remove(entry.getKey());
                         break;
                     }
                 }
             }
         }
-        return bool;
     }
+
 }
