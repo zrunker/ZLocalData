@@ -13,6 +13,10 @@ import java.util.Set;
 public class SQLiteDaoImpl implements SQLiteDao {
     private SQLiteHelper dbHelper;
 
+    // 无参构造方法，一定要手动执行initSQLiteHelper，用来继承实现
+    public SQLiteDaoImpl() {
+    }
+
     public SQLiteDaoImpl(Context context) {
         initSQLiteHelper(context);
     }
@@ -20,6 +24,13 @@ public class SQLiteDaoImpl implements SQLiteDao {
     @Override
     public void initSQLiteHelper(Context context) {
         dbHelper = SQLiteHelper.getSqliteHelper(context);
+    }
+
+    @Override
+    public void resetSQLiteHelper(Context context) {
+        if (dbHelper != null)
+            dbHelper = null;
+        initSQLiteHelper(context);
     }
 
     /**

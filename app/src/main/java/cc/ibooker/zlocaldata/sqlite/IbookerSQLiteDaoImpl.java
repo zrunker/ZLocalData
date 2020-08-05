@@ -11,7 +11,12 @@ import cc.ibooker.localdatalib.sqlite.SQLiteHelper;
  * Created by 邹峰立 on 2017/2/16 0016.
  */
 public class IbookerSQLiteDaoImpl implements IbookerSQLiteDao {
-    private SQLiteHelper dbHelper;
+    protected SQLiteHelper dbHelper;
+
+    // 无参构造方法，一定要手动执行initSQLiteHelper，用来继承实现
+    public IbookerSQLiteDaoImpl() {
+        IbookerSQLiteContants.addSQL();
+    }
 
     public IbookerSQLiteDaoImpl(Context context) {
         IbookerSQLiteContants.addSQL();
@@ -21,6 +26,13 @@ public class IbookerSQLiteDaoImpl implements IbookerSQLiteDao {
     @Override
     public void initSQLiteHelper(Context context) {
         dbHelper = SQLiteHelper.getSqliteHelper(context);
+    }
+
+    @Override
+    public void resetSQLiteHelper(Context context) {
+        if (dbHelper != null)
+            dbHelper = null;
+        initSQLiteHelper(context);
     }
 
     @Override

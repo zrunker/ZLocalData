@@ -9,10 +9,21 @@ import android.content.Context;
 public interface SQLiteDao {
 
     /**
+     * 初始化SQLiteHelper
+     *
      * @param context 上下文对象
      */
     void initSQLiteHelper(Context context);
 
-    // 删除数据库表
+    /**
+     * 重置SQLiteHelper
+     *
+     * @param context 上下文对象
+     */
+    void resetSQLiteHelper(Context context);
+
+    /**
+     * 删除数据库表
+     */
     void deleteDbTables();
 }
